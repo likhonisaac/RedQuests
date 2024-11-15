@@ -1,0 +1,111 @@
+name: Setup and Deploy Store
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  setup-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Create Basic Structure
+        run: |
+          # Create main directories
+          mkdir -p css js images admin
+
+          # Create index.html
+          cat > index.html << 'EOL'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>RedQuests Store</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link href="css/style.css" rel="stylesheet">
+          </head>
+          <body>
+              <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                  <div class="container">
+                      <a class="navbar-brand" href="#">RedQuests</a>
+                      <div class="navbar-nav">
+                          <a class="nav-link" href="admin/index.html">Admin</a>
+                      </div>
+                  </div>
+              </nav>
+
+              <div class="container mt-4">
+                  <div id="products" class="row">
+                      <!-- Products will load here -->
+                  </div>
+              </div>
+
+              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+              <script src="js/main.js"></script>
+          </body>
+          </html>
+          EOL
+
+          # Create admin page
+          cat > admin/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Admin - RedQuests</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link href="../css/admin.css" rel="stylesheet">
+          </head>
+          <body>
+              <div class="container mt-4">
+                  <h1>Admin Panel</h1>
+                  <div class="row mt-4">
+                      <div class="col-md-12">
+                          <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+                          <div id="productList" class="mt-4">
+                              <!-- Products will load here -->
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+              <script src="../js/admin.js"></script>
+          </body>
+          </html>
+          EOL
+
+          # Create main CSS and JS files
+          touch css/style.css css/admin.css js/main.js js/admin.js
+
+          # Add basic CSS
+          echo '.product-card { margin-bottom: 20px; }' > css/style.css
+          echo '.product-item { padding: 10px; }' > css/admin.css
+
+          # Add basic JS
+          echo 'function loadProducts() { /* TODO */ }' > js/main.js
+          echo 'function addProduct() { /* TODO */ }' > js/admin.js
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
